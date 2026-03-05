@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "skipLibCheck": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true,
+    "types": ["node", "chrome-types"]
+  },
+  "include": [
+    "package.json",
+    "vite.config.ts",
+    "manifest.config.ts",
+    "define.config.ts",
+    "wallpaper.plugin.ts"
+  ]
+}
