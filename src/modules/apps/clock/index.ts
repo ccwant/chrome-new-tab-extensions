@@ -6,7 +6,7 @@ export const clockApp: AppDef = {
   name: "时间小组件",
   type: "widget",
   description: "显示当前时间，宽度占 3 个格子。",
-  width: 3,
-  height: 1,
+  width: 4,
+  height: 2,
   component: ClockWidget,
 };

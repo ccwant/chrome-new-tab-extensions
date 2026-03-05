@@ -7,46 +7,46 @@
     @update:model-value="$emit('update:modelValue', $event)"
   >
     <div class="picker-inner">
-        <aside class="picker-sidebar">
+      <aside class="picker-sidebar">
+        <div
+          v-for="cat in categories"
+          :key="cat.id"
+          class="category-item"
+          :class="{ active: activeCategory === cat.id }"
+          @click="activeCategory = cat.id"
+        >
+          {{ cat.label }}
+        </div>
+      </aside>
+      <div class="picker-content">
+        <div v-if="activeCategory === 'solid'" class="wallpaper-grid">
           <div
-            v-for="cat in categories"
-            :key="cat.id"
-            class="category-item"
-            :class="{ active: activeCategory === cat.id }"
-            @click="activeCategory = cat.id"
+            v-for="(bg, idx) in WALLPAPER_BACKGROUND.solid"
+            :key="'s-' + idx"
+            class="wallpaper-item"
+            :class="{ selected: currentType === 'solid' && currentIndex === idx }"
+            :style="{ background: bg }"
+            @click="select('solid', idx)"
           >
-            {{ cat.label }}
-          </div>
-        </aside>
-        <div class="picker-content">
-          <div v-if="activeCategory === 'solid'" class="wallpaper-grid">
-            <div
-              v-for="(bg, idx) in WALLPAPER_BACKGROUND.solid"
-              :key="'s-' + idx"
-              class="wallpaper-item"
-              :class="{ selected: currentType === 'solid' && currentIndex === idx }"
-              :style="{ background: bg }"
-              @click="select('solid', idx)"
-            >
-              <span v-if="currentType === 'solid' && currentIndex === idx" class="check">✓</span>
-            </div>
-          </div>
-          <div v-else class="wallpaper-grid">
-            <div
-              v-for="(url, idx) in imageUrls"
-              :key="'i-' + idx"
-              class="wallpaper-item wallpaper-item--image"
-              :class="{ selected: currentType === 'image' && currentIndex === idx }"
-              :style="{ backgroundImage: `url(${url})` }"
-              @click="select('image', idx)"
-            >
-              <span v-if="currentType === 'image' && currentIndex === idx" class="check">✓</span>
-            </div>
-            <div v-if="imageUrls.length === 0" class="empty-hint">
-              将图片放入 <code>public/wallpapers</code> 文件夹
-            </div>
+            <span v-if="currentType === 'solid' && currentIndex === idx" class="check">✓</span>
           </div>
         </div>
+        <div v-else class="wallpaper-grid">
+          <div
+            v-for="(url, idx) in imageUrls"
+            :key="'i-' + idx"
+            class="wallpaper-item wallpaper-item--image"
+            :class="{ selected: currentType === 'image' && currentIndex === idx }"
+            :style="{ backgroundImage: `url(${url})` }"
+            @click="select('image', idx)"
+          >
+            <span v-if="currentType === 'image' && currentIndex === idx" class="check">✓</span>
+          </div>
+          <div v-if="imageUrls.length === 0" class="empty-hint">
+            将图片放入 <code>public/wallpapers</code> 文件夹
+          </div>
+        </div>
+      </div>
     </div>
   </Dialog>
 </template>
@@ -56,7 +56,7 @@ import { ref, watch } from "vue";
 import { WALLPAPER_BACKGROUND } from "@/config";
 import { getWallpaperImageUrls } from "@/wallpapers";
 import Dialog from "@/components/Dialog/index.vue";
-import type { WallpaperType } from "@/composables/useThemeSettings";
+import { WallpaperType } from "@/types";
 
 const props = defineProps<{
   modelValue: boolean;
@@ -107,7 +107,7 @@ function select(type: WallpaperType, index: number) {
 <style lang="scss" scoped>
 .picker-inner {
   flex: 1;
-  min-height: 0;
+  height: 75vh;
   display: flex;
   overflow: hidden;
 }

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="clock-widget">
     <div class="widget-clock-time">{{ time }}</div>
     <div class="widget-clock-date">{{ date }}</div>
   </div>
@@ -10,6 +10,10 @@ import { ref, onMounted, onUnmounted } from "vue";
 import dayjs from "dayjs";
 import "dayjs/locale/zh-cn";
 import { Solar } from "lunar-javascript";
+
+defineOptions({
+  inheritAttrs: false,
+});
 
 function formatTime(): string {
   return dayjs().format("HH:mm:ss");
@@ -42,16 +46,25 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss" scoped>
+.clock-widget {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
 .widget-clock-time {
   margin-top: -5px;
-  font-size: 48px;
+  font-size: 72px;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  font-family: "HarmonyOS_Sans";
   color: var(--theme-app-color);
+  transition: font 0.2s;
 }
 
 .widget-clock-date {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--theme-app-color);
 }
 </style>

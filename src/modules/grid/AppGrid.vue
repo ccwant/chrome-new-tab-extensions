@@ -18,7 +18,8 @@
             apps[idx]?.width === 2 ? 'app-cell-span-2' : '',
             apps[idx]?.width === 3 ? 'app-cell-span-3' : '',
             apps[idx]?.width === 4 ? 'app-cell-span-4' : '',
-            getPreviewClasses(idx),
+            apps[idx]?.height === 2 ? 'app-cell-row-span-2' : '',
+            isCellCovered(idx) ? 'app-cell-covered' : '',
           ]"
           @contextmenu="(e) => $emit('contextmenu', e, idx, apps[idx])"
           @dragover="onDragover"
@@ -61,6 +62,11 @@
           <div v-else class="app-card app-ghost" />
         </div>
       </div>
+      <div
+        v-if="dragState.previewIndex !== null && gridEl"
+        class="app-cell-preview-overlay"
+        :style="previewOverlayStyle"
+      />
       <div class="grid-fade" />
       <div class="empty-hint" :style="{ display: isEmpty ? 'flex' : 'none' }" />
     </div>
@@ -98,18 +104,41 @@ const dragState = reactive<{
   offsetY: number;
   previewIndex: number | null;
   previewWidth: number;
-}>({ fromIndex: null, offsetX: 0, offsetY: 0, previewIndex: null, previewWidth: 1 });
+  previewHeight: number;
+}>({ fromIndex: null, offsetX: 0, offsetY: 0, previewIndex: null, previewWidth: 1, previewHeight: 1 });
 
 const appCount = computed(() => props.apps.filter(Boolean).length);
 const isEmpty = computed(() => appCount.value === 0);
 
 function isCellOccupied(i: number): boolean {
   if (props.apps[i]) return true;
-  for (let j = 0; j < i; j++) {
+  for (let j = 0; j < props.apps.length; j++) {
     const prev = props.apps[j];
     if (!prev) continue;
     const pw = prev.width || 1;
-    if (pw > 1 && j + pw > i) return true;
+    const ph = prev.height || 1;
+    for (let r = 0; r < ph; r++) {
+      for (let c = 0; c < pw; c++) {
+        if (j + r * GRID_COLS + c === i) return true;
+      }
+    }
+  }
+  return false;
+}
+
+function isCellCovered(i: number): boolean {
+  for (let j = 0; j < props.apps.length; j++) {
+    const prev = props.apps[j];
+    if (!prev) continue;
+    const pw = prev.width || 1;
+    const ph = prev.height || 1;
+    if (ph <= 1 && pw <= 1) continue;
+    for (let r = 0; r < ph; r++) {
+      for (let c = 0; c < pw; c++) {
+        if (r === 0 && c === 0) continue;
+        if (j + r * GRID_COLS + c === i) return true;
+      }
+    }
   }
   return false;
 }
@@ -130,17 +159,21 @@ function getIndexFromPosition(clientX: number, clientY: number): number | null {
 
 function canDropAt(targetIndex: number, moved: AppItem): boolean {
   const w = moved.width || 1;
+  const h = moved.height || 1;
   const fromIndex = dragState.fromIndex!;
   const isAvailable = (i: number) => !isCellOccupied(i) || i === fromIndex;
-  if (w === 1) return isAvailable(targetIndex);
   const col = targetIndex % GRID_COLS;
+  const row = Math.floor(targetIndex / GRID_COLS);
   if (w === 2 && col > GRID_COLS - 2) return false;
   if (w === 3 && col > GRID_COLS - 3) return false;
-  const row = Math.floor(targetIndex / GRID_COLS);
-  const second = row * GRID_COLS + col + 1;
-  const third = row * GRID_COLS + col + 2;
-  const cells = w === 2 ? [targetIndex, second] : [targetIndex, second, third];
-  return cells.every(isAvailable);
+  if (h === 2 && row > GRID_ROWS - 2) return false;
+  for (let r = 0; r < h; r++) {
+    for (let c = 0; c < w; c++) {
+      const idx = targetIndex + r * GRID_COLS + c;
+      if (!isAvailable(idx)) return false;
+    }
+  }
+  return true;
 }
 
 function onDragStart(e: DragEvent, index: number) {
@@ -151,6 +184,7 @@ function onDragStart(e: DragEvent, index: number) {
   dragState.offsetY = e.clientY - rect.top;
   dragState.previewIndex = null;
   dragState.previewWidth = 1;
+  dragState.previewHeight = 1;
 }
 
 function onDragEnd() {
@@ -174,6 +208,7 @@ function onDragover(e: DragEvent) {
   e.dataTransfer!.dropEffect = "move";
   dragState.previewIndex = targetIndex;
   dragState.previewWidth = moved.width || 1;
+  dragState.previewHeight = moved.height || 1;
 }
 
 function onDrop(e: DragEvent) {
@@ -199,22 +234,26 @@ function onDrop(e: DragEvent) {
   emit("update:apps", next);
 }
 
-function getPreviewClasses(i: number): Record<string, boolean> {
-  if (dragState.previewIndex === null) return {};
+const previewOverlayStyle = computed(() => {
+  if (dragState.previewIndex === null || !gridEl.value) return {};
   const w = dragState.previewWidth || 1;
-  const first = dragState.previewIndex;
-  if (i === first)
-    return {
-      "app-cell-preview": true,
-      "app-cell-preview-first": true,
-      "app-cell-preview-end": w === 1,
-    };
-  if (w >= 2 && i === first + 1)
-    return { "app-cell-preview": true, "app-cell-preview-end": w === 2 };
-  if (w >= 3 && i === first + 2)
-    return { "app-cell-preview": true, "app-cell-preview-end": w === 3 };
-  return {};
-}
+  const h = dragState.previewHeight || 1;
+  const col = dragState.previewIndex % GRID_COLS;
+  const row = Math.floor(dragState.previewIndex / GRID_COLS);
+  const rect = gridEl.value.getBoundingClientRect();
+  const wrapper = gridEl.value.parentElement?.getBoundingClientRect();
+  if (!rect.width || !rect.height || !wrapper) return {};
+  const cellW = rect.width / GRID_COLS;
+  const cellH = rect.height / GRID_ROWS;
+  const left = rect.left - wrapper.left + col * cellW;
+  const top = rect.top - wrapper.top + row * cellH;
+  return {
+    left: `${left}px`,
+    top: `${top}px`,
+    width: `${cellW * w}px`,
+    height: `${cellH * h}px`,
+  };
+});
 
 function updateGridSize() {
   const height = window.outerHeight - 87 - 20;
@@ -284,19 +323,12 @@ onUnmounted(() => {
   overflow: hidden;
 }
 
-.app-cell-preview {
-  box-shadow: none;
+.app-cell-preview-overlay {
+  position: absolute;
+  pointer-events: none;
   border: 2px solid var(--theme-accent);
-  border-right-width: 0;
-  border-left-width: 0;
-
-  &-first {
-    border-left-width: 2px;
-  }
-
-  &-end {
-    border-right-width: 2px;
-  }
+  border-radius: 4px;
+  z-index: 2;
 }
 
 .app-cell-span-2 {
@@ -324,6 +356,14 @@ onUnmounted(() => {
   & + .app-cell + .app-cell + .app-cell {
     display: none;
   }
+}
+
+.app-cell-row-span-2 {
+  grid-row: span 2;
+}
+
+.app-cell-covered {
+  display: none;
 }
 
 .app-card {

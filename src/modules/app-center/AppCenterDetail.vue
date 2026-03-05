@@ -18,6 +18,7 @@ import type { AppDef, AddAppPayload } from "@/types";
 
 const props = defineProps<{
   app: AppDef;
+  preferredIndex?: number | null;
   addApp: (p: AddAppPayload) => boolean;
   showToast: (msg: string) => void;
   onAddSuccess?: () => void;
@@ -34,6 +35,7 @@ function addWidget() {
     widgetId: props.app.id,
     width: props.app.width,
     height: props.app.height,
+    preferredIndex: props.preferredIndex ?? undefined,
   };
   const ok = props.addApp(payload);
   if (ok) {

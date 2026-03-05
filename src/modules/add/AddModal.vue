@@ -53,6 +53,7 @@ import type { AddAppPayload, AppItem } from "@/types";
 const props = defineProps<{
   modelValue: boolean;
   editApp: { index: number; app: AppItem } | null;
+  preferredIndex?: number | null;
   addApp: (payload: AddAppPayload) => boolean;
   updateApp: (index: number, payload: AddAppPayload) => void;
   showToast: (msg: string) => void;
@@ -99,6 +100,7 @@ async function submitShortcut() {
     url: normalizeUrl(url),
     iconDataUrl: isDataUrl ? icon : undefined,
     iconUrl: !isDataUrl && icon ? icon : undefined,
+    preferredIndex: props.preferredIndex ?? undefined,
   };
   if (props.editApp) {
     props.updateApp(props.editApp.index, payload);
@@ -135,7 +137,7 @@ watch(
 
 <style lang="scss" scoped>
 .modal-form {
-  width: 600px;
+  width: 500px;
   height: auto;
   display: flex;
   flex-direction: column;

@@ -19,10 +19,12 @@
       @add="
         addModalVisible = true;
         editAppTarget = null;
+        addModalPreferredIndex = contextMenu.targetIndex;
         hideContextMenu();
       "
       @app-center="
         appCenterVisible = true;
+        appCenterPreferredIndex = contextMenu.targetIndex;
         hideContextMenu();
       "
       @settings="
@@ -35,6 +37,7 @@
       :model-value="addModalVisible"
       @update:model-value="addModalVisible = $event"
       :edit-app="editAppTarget"
+      :preferred-index="addModalPreferredIndex"
       :add-app="addApp"
       :update-app="updateApp"
       :show-toast="showToast"
@@ -42,6 +45,7 @@
     <AppCenter
       :model-value="appCenterVisible"
       @update:model-value="appCenterVisible = $event"
+      :preferred-index="appCenterPreferredIndex"
       :add-app="addApp"
       :show-toast="showToast"
     />
@@ -55,7 +59,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, onUnmounted } from "vue";
 import { APPS } from "./modules/apps/apps";
-import { DEFAULT_APPS, STORAGE_KEY, MAX_APPS } from "./config";
+import { DEFAULT_APPS, STORAGE_KEY, MAX_APPS, GRID_COLS, GRID_ROWS } from "./config";
 import AddModal from "./modules/add/AddModal.vue";
 import AppCenter from "./modules/app-center/AppCenter.vue";
 import AppGrid from "./modules/grid/AppGrid.vue";
@@ -68,14 +72,17 @@ import Wallpaper from "./modules/wallpaper/index.vue";
 const apps = ref<(AppItem | null)[]>(new Array(MAX_APPS).fill(null));
 const addModalVisible = ref(false);
 const editAppTarget = ref<{ index: number; app: AppItem } | null>(null);
+const addModalPreferredIndex = ref<number | null>(null);
+const appCenterPreferredIndex = ref<number | null>(null);
 const appCenterVisible = ref(false);
 const settingsDrawerVisible = ref(false);
 const contextMenu = reactive<{
   visible: boolean;
   x: number;
   y: number;
+  targetIndex: number | null;
   targetApp: { index: number; app: AppItem } | null;
-}>({ visible: false, x: 0, y: 0, targetApp: null });
+}>({ visible: false, x: 0, y: 0, targetIndex: null, targetApp: null });
 const toast = reactive({ visible: false, text: "" });
 
 function showToast(message: string) {
@@ -151,20 +158,55 @@ function saveApps() {
 }
 
 function isCellOccupied(i: number): boolean {
+  if (i < 0 || i >= MAX_APPS) return true;
   if (apps.value[i]) return true;
-  for (let j = 0; j < i; j++) {
+  for (let j = 0; j < apps.value.length; j++) {
     const prev = apps.value[j];
     if (!prev) continue;
     const pw = prev.width || 1;
-    if (pw > 1 && j + pw > i) return true;
+    const ph = prev.height || 1;
+    for (let r = 0; r < ph; r++) {
+      for (let c = 0; c < pw; c++) {
+        if (j + r * GRID_COLS + c === i) return true;
+      }
+    }
   }
   return false;
 }
 
+function canPlaceAt(i: number, w: number, h: number): boolean {
+  const col = i % GRID_COLS;
+  const row = Math.floor(i / GRID_COLS);
+  if (col + w > GRID_COLS || row + h > GRID_ROWS) return false;
+  for (let r = 0; r < h; r++) {
+    for (let c = 0; c < w; c++) {
+      if (isCellOccupied(i + r * GRID_COLS + c)) return false;
+    }
+  }
+  return true;
+}
+
+/** 从 center 开始向外扩展，生成候选索引（按切比雪夫距离由近到远） */
+function* candidatesAround(center: number): Generator<number> {
+  const centerRow = Math.floor(center / GRID_COLS);
+  const centerCol = center % GRID_COLS;
+  const maxRadius = Math.max(centerRow, GRID_ROWS - 1 - centerRow, centerCol, GRID_COLS - 1 - centerCol);
+  for (let r = 0; r <= maxRadius; r++) {
+    for (let row = Math.max(0, centerRow - r); row <= Math.min(GRID_ROWS - 1, centerRow + r); row++) {
+      for (let col = Math.max(0, centerCol - r); col <= Math.min(GRID_COLS - 1, centerCol + r); col++) {
+        if (Math.max(Math.abs(row - centerRow), Math.abs(col - centerCol)) === r) {
+          yield row * GRID_COLS + col;
+        }
+      }
+    }
+  }
+}
+
 function addApp(payload: AddAppPayload): boolean {
-  const { name, url, iconDataUrl, iconUrl, type, widgetId, height } = payload;
+  const { name, url, iconDataUrl, iconUrl, type, widgetId, width, height, preferredIndex } = payload;
   const appDef = type === "widget" || type === "app" ? APPS.find((a) => a.id === widgetId) : null;
-  const w = appDef && (appDef.width === 2 || appDef.width === 3) ? appDef.width! : 1;
+  const w = (type === "widget" || type === "app") && appDef ? (appDef.width ?? width ?? 1) : (width ?? 1);
+  const h = height ?? appDef?.height ?? 1;
 
   if (apps.value.filter(Boolean).length >= MAX_APPS) {
     showToast("已达到 100 个应用上限");
@@ -172,31 +214,21 @@ function addApp(payload: AddAppPayload): boolean {
   }
 
   let idx = -1;
-  if (w === 2) {
-    for (let i = 0; i < MAX_APPS - 1; i++) {
-      if (isCellOccupied(i) || isCellOccupied(i + 1)) continue;
-      if (i % 10 > 8) continue;
-      idx = i;
-      break;
-    }
-  } else if (w === 3) {
-    for (let i = 0; i < MAX_APPS - 2; i++) {
-      if (isCellOccupied(i) || isCellOccupied(i + 1) || isCellOccupied(i + 2)) continue;
-      if (i % 10 > 7) continue;
-      idx = i;
-      break;
-    }
-  } else {
-    idx = apps.value.findIndex((a, i) => {
-      if (a) return false;
-      for (let j = 0; j < i; j++) {
-        const prev = apps.value[j];
-        if (!prev) continue;
-        const pw = prev.width || 1;
-        if (pw > 1 && j + pw > i) return false;
+  if (typeof preferredIndex === "number") {
+    for (const i of candidatesAround(preferredIndex)) {
+      if (canPlaceAt(i, w, h)) {
+        idx = i;
+        break;
       }
-      return true;
-    });
+    }
+  }
+  if (idx === -1) {
+    for (let i = 0; i < MAX_APPS; i++) {
+      if (canPlaceAt(i, w, h)) {
+        idx = i;
+        break;
+      }
+    }
   }
   if (idx === -1) {
     showToast("已达到 100 个应用上限");
@@ -213,7 +245,7 @@ function addApp(payload: AddAppPayload): boolean {
     type: (type as AppItem["type"]) || "shortcut",
     widgetId: widgetId || null,
     width: w,
-    height: height || 1,
+    height: h,
   };
   apps.value = next;
   saveApps();
@@ -254,7 +286,7 @@ function openEditModal() {
 function deleteApp() {
   const { index } = contextMenu.targetApp ?? {};
   if (index == null) return;
-  if (!confirm("确定要删除该应用吗？")) return;
+  // if (!confirm("确定要删除该应用吗？")) return;
   removeApp(index);
   hideContextMenu();
   showToast("已删除");
@@ -266,6 +298,7 @@ function onAppContextMenu(e: MouseEvent, index: number, app: AppItem | null) {
   contextMenu.visible = true;
   contextMenu.x = e.clientX;
   contextMenu.y = e.clientY;
+  contextMenu.targetIndex = index;
   if (app) contextMenu.targetApp = { index, app };
   else contextMenu.targetApp = null;
 }
@@ -293,6 +326,7 @@ function onDesktopContextMenu(e: MouseEvent) {
   contextMenu.visible = true;
   contextMenu.x = e.clientX;
   contextMenu.y = e.clientY;
+  contextMenu.targetIndex = null;
   contextMenu.targetApp = null;
 }
 

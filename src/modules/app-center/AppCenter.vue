@@ -17,6 +17,7 @@
       <AppCenterDetail
         v-if="selectedApp"
         :app="selectedApp"
+        :preferred-index="props.preferredIndex"
         :add-app="addApp"
         :show-toast="showToast"
         :on-add-success="close"
@@ -54,6 +55,7 @@ import type { AddAppPayload } from "@/types";
 
 const props = defineProps<{
   modelValue: boolean;
+  preferredIndex?: number | null;
   addApp: (p: AddAppPayload) => boolean;
   showToast: (msg: string) => void;
 }>();

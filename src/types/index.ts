@@ -30,6 +30,8 @@ export interface AddAppPayload {
   widgetId?: string;
   width?: number;
   height?: number;
+  /** 优先放置的目标索引（如从右键菜单空白处新增时传入） */
+  preferredIndex?: number;
 }
 
 export interface AppDef {

@@ -18,6 +18,7 @@
           @open-wallpaper-picker="wallpaperDialogVisible = true"
         />
         <ChangelogSettings v-else-if="activeMenu === 'changelog'" />
+        <AboutSettings v-else-if="activeMenu === 'about'" />
       </main>
     </div>
   </Drawer>
@@ -36,6 +37,7 @@ import Drawer from "@/components/Drawer/index.vue";
 import { useThemeSettings } from "@/composables/useThemeSettings";
 import ThemeSettings from "./menus/ThemeSettings.vue";
 import ChangelogSettings from "./menus/ChangelogSettings.vue";
+import AboutSettings from "./menus/AboutSettings.vue";
 import WallpaperPickerDialog from "./WallpaperPickerDialog.vue";
 
 const modelValue = defineModel<boolean>({ default: false });
@@ -43,6 +45,7 @@ const modelValue = defineModel<boolean>({ default: false });
 const menuItems = [
   { id: "theme", label: "主题设置" },
   { id: "changelog", label: "更新日志" },
+  { id: "about", label: "关于" },
 ];
 const activeMenu = ref("theme");
 const wallpaperDialogVisible = ref(false);

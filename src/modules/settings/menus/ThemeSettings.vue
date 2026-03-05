@@ -30,21 +30,27 @@
     </div>
     <div class="field">
       <label class="field-label">壁纸</label>
-      <button class="button button-outline" @click="$emit('open-wallpaper-picker')">
-        更换壁纸
-      </button>
+      <div
+        class="wallpaper-preview"
+        :style="{ background: previewBackground }"
+        @click="$emit('open-wallpaper-picker')"
+      >
+        <span class="wallpaper-preview-btn">更换壁纸</span>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { watch } from "vue";
+import { computed, watch } from "vue";
 import { useThemeSettings } from "@/composables/useThemeSettings";
 import { getWallpaperImageUrls } from "@/wallpapers";
 
 defineEmits<{ (e: "open-wallpaper-picker"): void }>();
 
-const { settings, applyToDOM } = useThemeSettings(getWallpaperImageUrls);
+const { settings, applyToDOM, getWallpaperBackground } = useThemeSettings(getWallpaperImageUrls);
+
+const previewBackground = computed(() => getWallpaperBackground(getWallpaperImageUrls()));
 
 watch(settings, () => applyToDOM(), { deep: true });
 </script>
@@ -96,24 +102,35 @@ watch(settings, () => applyToDOM(), { deep: true });
   min-width: 36px;
 }
 
-.button {
-  display: inline-flex;
+.wallpaper-preview {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+
+  &:hover .wallpaper-preview-btn {
+    background: rgba(0, 0, 0, 0.5);
+  }
+}
+
+.wallpaper-preview-btn {
+  margin: auto;
+  display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 13px;
-  cursor: pointer;
-  border: 1px solid var(--theme-border-strong);
-  background: var(--theme-surface-dim);
-  color: var(--theme-text);
-
-  &-outline {
-    background: transparent;
-
-    &:hover {
-      background: var(--theme-hover);
-    }
-  }
+  font-size: 14px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 5px;
+  color: white;
+  background: rgba(0, 0, 0, 0.2);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  transition: background 0.2s;
 }
 </style>

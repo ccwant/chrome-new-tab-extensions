@@ -1,9 +1,11 @@
 {
   "name": "chrome-new-tab-extensions",
-  "displayName": "应用网格新标签页123",
+  "displayName": "New Tab",
   "version": "1.0.0",
   "private": true,
   "type": "module",
+  "license": "MIT",
+  "author": "ccwant<519363035@qq.com>",
   "repository": {
     "type": "git",
     "url": "https://github.com/ccwant/chrome-new-tab-extensions"

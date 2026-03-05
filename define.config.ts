@@ -17,9 +17,10 @@ const raw = {
   VERSION: packageJson.version,
   NAME: packageJson.name,
   DISPLAY_NAME: packageJson.displayName,
+  AUTHOR: packageJson.author ?? "",
   CHANGELOG: changelog,
   GIT_COMMIT: gitCommit,
-  GITHUB_URL: packageJson.repository.url,
+  GITHUB_URL: packageJson.repository?.url ?? "",
   // Set the HTML title for all pages from package.json so you can use %HTMLTITLE% in your HTML files.
   HTML_TITLE: packageJson.displayName,
 };
