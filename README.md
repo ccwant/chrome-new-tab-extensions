@@ -1,6 +1,19 @@
 # Chrome 新标签页扩展
 
+[![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
+
 Vite + Vue 3 + TypeScript 构建的 Chrome 新标签页扩展。
+
+## 功能
+
+- 覆盖chrome浏览器新标签页
+- 像操作系统桌面一样，添加自定义组件和快捷入口
+- 支持自定义背景图片和颜色
+-
+
+## 简介
+
+![image](screenshots/ScreenShot_2026-03-06_093433_396.png)
 
 ## 开发
 
@@ -22,6 +35,12 @@ npm run dev
 3. 开启「开发者模式」
 4. 点击「加载已解压的扩展程序」，选择项目的 `dist` 目录
 
+## 自定义背景图片
+
+1. 进入浏览器扩展程序安装目录
+2. 找到wallpapers目录
+3. 移动图片到wallpapers目录下，并重启扩展程序
+
 ## 项目结构
 
 ```
@@ -33,9 +52,7 @@ src/
 ├── components/       # 通用组件（Dialog）
 ├── add/              # 新增应用弹窗
 ├── app-center/       # 应用中心
-└── apps/             # 小组件（clock, bookmarks）
-    ├── clock/
-    └── bookmarks/
+└── apps/             # 内置小组件
 ```
 
 ## 技术栈
@@ -44,3 +61,7 @@ src/
 - TypeScript
 - Vite 5
 - @crxjs/vite-plugin
+
+## License
+
+MIT
