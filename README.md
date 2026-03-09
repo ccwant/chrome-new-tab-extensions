@@ -14,6 +14,7 @@ Vite + Vue 3 + TypeScript 构建的 Chrome 新标签页扩展。
 ## 简介
 
 ![image](screenshots/ScreenShot_2026-03-06_093433_396.png)
+![image](screenshots/ScreenShot_2026-03-10_003007_485.png)
 ![image](screenshots/ScreenShot_2026-03-06_143831_288.png)
 
 ## 开发
