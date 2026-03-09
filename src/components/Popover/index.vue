@@ -68,26 +68,28 @@ watch(
       updatePosition();
       window.addEventListener("resize", updatePosition);
       window.addEventListener("scroll", updatePosition, true);
-      document.addEventListener("click", onClickOutside);
     } else {
       window.removeEventListener("resize", updatePosition);
       window.removeEventListener("scroll", updatePosition, true);
-      document.removeEventListener("click", onClickOutside);
     }
   }
 );
 
 onMounted(() => {
   if (props.modelValue) updatePosition();
+  // 使用捕获阶段监听 click，提高优先级，避免被内部 stopPropagation 影响
+  document.addEventListener("click", onClickOutside, true);
 });
 
 onUnmounted(() => {
   window.removeEventListener("resize", updatePosition);
   window.removeEventListener("scroll", updatePosition, true);
-  document.removeEventListener("click", onClickOutside);
+  document.removeEventListener("click", onClickOutside, true);
 });
 
 function onClickOutside(e: MouseEvent) {
+  // 只有在弹出层可见时才处理关闭
+  if (!props.modelValue) return;
   if (triggerEl.value && triggerEl.value.contains(e.target as Node)) return;
   emit("update:modelValue", false);
 }
@@ -132,4 +134,3 @@ function onClickOutside(e: MouseEvent) {
   transform: translateY(-4px);
 }
 </style>
-

@@ -170,7 +170,14 @@ function canDropAt(targetIndex: number, moved: AppItem): boolean {
   const w = moved.width || 1;
   const h = moved.height || 1;
   const fromIndex = dragState.fromIndex!;
-  const isAvailable = (i: number) => !isCellOccupied(i) || i === fromIndex;
+  // 计算当前正在拖拽组件自身占用的所有格子索引，用于在拖拽判断时排除自身
+  const selfIndices = new Set<number>();
+  for (let r = 0; r < h; r++) {
+    for (let c = 0; c < w; c++) {
+      selfIndices.add(fromIndex + r * GRID_COLS + c);
+    }
+  }
+  const isAvailable = (i: number) => !isCellOccupied(i) || selfIndices.has(i);
   const col = targetIndex % GRID_COLS;
   const row = Math.floor(targetIndex / GRID_COLS);
   if (w === 2 && col > GRID_COLS - 2) return false;
@@ -314,13 +321,13 @@ onUnmounted(() => {
     inset: 0;
     pointer-events: none;
     background-image:
-      linear-gradient(to right, var(--theme-border) 1px, transparent 1px),
-      linear-gradient(to bottom, var(--theme-border) 1px, transparent 1px);
+      linear-gradient(to right, var(--theme-grid-border) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--theme-grid-border) 1px, transparent 1px);
     background-size:
       calc(100% / v-bind(GRID_COLS)) 100%,
       100% calc(100% / v-bind(GRID_ROWS));
-    border-right: 1px solid var(--theme-border);
-    border-bottom: 1px solid var(--theme-border);
+    border-right: 1px solid var(--theme-grid-border);
+    border-bottom: 1px solid var(--theme-grid-border);
     opacity: 0.9;
   }
 }

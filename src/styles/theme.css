@@ -1,29 +1,9 @@
-/* 跟随系统深色/浅色模式 */
+/* 跟随系统深色/浅色模式
+ * 变量只在 light/dark 媒体查询里定义，避免重复两套。
+ * :root 只负责声明 color-scheme。
+ */
 :root {
   color-scheme: light dark;
-  /* 默认浅色，无系统偏好时使用 */
-  --theme-bg: #ffffff;
-  --theme-bg-mid: #e2e8f0;
-  --theme-bg-end: #cbd5e1;
-  --theme-app-color: #ffffff;
-  --theme-text: #0f172a;
-  --theme-text-muted: #64748b;
-  --theme-border: rgba(100, 116, 139, 0.4);
-  --theme-border-strong: rgba(100, 116, 139, 0.5);
-  --theme-surface: rgba(255, 255, 255, 0.98);
-  --theme-surface-dim: rgba(248, 250, 252, 0.98);
-  --theme-surface-overlay: rgba(15, 23, 42, 0.2);
-  --theme-hover: rgba(100, 116, 139, 0.12);
-  --theme-hover-light: rgba(100, 116, 139, 0.08);
-  --theme-accent: rgba(59, 130, 246, 0.9);
-  --theme-accent-bg: rgba(59, 130, 246, 0.12);
-  --theme-accent-solid: #2563eb;
-  --theme-icon-bg: #ffffff;
-  --theme-icon-text: #0f172a;
-  --theme-shadow: rgba(0, 0, 0, 0.1);
-  --wall-blur: 5px;
-  --wall-mask: 0.4;
-  --wall-background: linear-gradient(0deg, rgb(251, 194, 235) 0%, rgb(166, 193, 238) 100%);
 }
 
 /* 深色模式 */
@@ -35,6 +15,7 @@
     --theme-app-color: #ffffff;
     --theme-text: #e5e7eb;
     --theme-text-muted: #94a3b8;
+    --theme-grid-border: rgba(148, 163, 184, 0.4);
     --theme-border: rgba(148, 163, 184, 0.4);
     --theme-border-strong: rgba(148, 163, 184, 0.6);
     --theme-surface: rgba(15, 23, 42, 0.98);
@@ -60,7 +41,8 @@
     --theme-app-color: #ffffff;
     --theme-text: #0f172a;
     --theme-text-muted: #64748b;
-    --theme-border: rgba(100, 116, 139, 0.4);
+    --theme-grid-border: rgba(100, 116, 139, 0.4);
+    --theme-border: rgba(150, 150, 150, 0.2);
     --theme-border-strong: rgba(100, 116, 139, 0.5);
     --theme-surface: rgba(255, 255, 255, 0.98);
     --theme-surface-dim: rgba(248, 250, 252, 0.98);

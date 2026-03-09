@@ -1,31 +1,33 @@
 <template>
-  <div
-    v-if="modelValue"
-    class="modal-backdrop active"
-    :style="zIndex ? { zIndex } : undefined"
-    @click="handleBackdropClick"
-    @contextmenu.prevent.stop
-  >
-    <div class="modal glass" :class="modalClass" role="dialog" @click.stop>
-      <template v-if="useStructured">
-        <div class="modal-header">
-          <slot name="header" :close="close">
-            <span v-if="title" class="modal-title">{{ title }}</span>
-            <button class="modal-close" @click="close">×</button>
-          </slot>
-        </div>
-        <div class="modal-body">
+  <teleport :disabled="!appendToBody" to="body">
+    <div
+      v-if="modelValue"
+      class="modal-backdrop active"
+      :style="zIndex ? { zIndex } : undefined"
+      @click="handleBackdropClick"
+      @contextmenu.prevent.stop
+    >
+      <div class="modal glass" :class="modalClass" role="dialog" @click.stop>
+        <template v-if="useStructured">
+          <div class="modal-header">
+            <slot name="header" :close="close">
+              <span v-if="title" class="modal-title">{{ title }}</span>
+              <button class="modal-close" @click="close">×</button>
+            </slot>
+          </div>
+          <div class="modal-body">
+            <slot />
+          </div>
+          <div v-if="$slots.footer" class="modal-footer">
+            <slot name="footer" />
+          </div>
+        </template>
+        <template v-else>
           <slot />
-        </div>
-        <div v-if="$slots.footer" class="modal-footer">
-          <slot name="footer" />
-        </div>
-      </template>
-      <template v-else>
-        <slot />
-      </template>
+        </template>
+      </div>
     </div>
-  </div>
+  </teleport>
 </template>
 
 <script setup lang="ts">
@@ -37,8 +39,9 @@ const props = withDefaults(
     zIndex?: number;
     title?: string;
     modalClass?: string;
+    appendToBody?: boolean;
   }>(),
-  { zIndex: undefined, title: undefined, modalClass: "" }
+  { zIndex: undefined, title: undefined, modalClass: "", appendToBody: false }
 );
 const slots = useSlots();
 const emit = defineEmits<{ (e: "update:modelValue", v: boolean): void }>();
@@ -115,7 +118,7 @@ onUnmounted(() => {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 18px;
+    padding: 18px 18px 10px;
   }
 
   &-title {

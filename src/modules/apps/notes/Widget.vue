@@ -1,12 +1,12 @@
 <template>
   <div class="note-widget" @click="openDialog">
     <ul class="note-list">
-      <li v-for="(note, index) in notes" :key="note.id" class="note-item">
+      <li v-for="(note, index) in simpleNotes" :key="note.id" class="note-item">
         <span class="note-text">{{
           note.title || (note.content || "").split("\n")[0] || `便签 ${index + 1}`
         }}</span>
       </li>
-      <li v-if="notes.length === 0" class="note-empty">点击这里添加第一条便签</li>
+      <li v-if="simpleNotes.length === 0" class="note-empty">点击这里添加第一条便签</li>
     </ul>
   </div>
 
@@ -23,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref, watch } from "vue";
+import { computed, onMounted, reactive, ref, watch } from "vue";
 import NotesDialog from "./NotesDialog.vue";
 
 defineOptions({
@@ -41,6 +41,11 @@ const STORAGE_KEY = "newtab_notes_v1";
 const notes = reactive<NoteItem[]>([]);
 const dialogVisible = ref(false);
 const activeIndex = ref(0);
+
+// 展示5条
+const simpleNotes = computed(() => {
+  return notes.slice(0, 5);
+});
 
 function loadNotes() {
   try {
@@ -136,7 +141,7 @@ watch(
   font-size: 12px;
   color: var(--theme-text);
   border-bottom: 1px solid var(--theme-border);
-  padding: 4px 10px;
+  padding: 3px 10px;
 
   &:last-child {
     border-bottom: none;

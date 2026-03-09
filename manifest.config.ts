@@ -15,4 +15,5 @@ export default defineManifest({
       matches: ["<all_urls>"],
     },
   ],
+  host_permissions: ["https://date.appworlds.cn/*"],
 });

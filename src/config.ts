@@ -24,3 +24,8 @@ export const WALLPAPER_BACKGROUND = {
     "linear-gradient(0deg, rgb(134, 143, 150) 0%, rgb(89, 97, 100) 100%)",
   ],
 };
+
+// 接口盒子API KEY
+export const APIHZ_API_KEY = "ace43e00777b2c963ab404f9d1a9b1f3";
+// 接口盒子开发者ID（从示例注释中抽取）
+export const APIHZ_APP_ID = "10013740";
