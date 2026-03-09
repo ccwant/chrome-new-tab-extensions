@@ -1,7 +1,7 @@
 import ClockWidget from "./ClockWidget.vue";
 import type { AppDef } from "@/types";
 
-export const clockApp: AppDef = {
+export default {
   id: "clock",
   name: "时间小组件",
   type: "widget",
@@ -9,4 +9,4 @@ export const clockApp: AppDef = {
   width: 4,
   height: 2,
   component: ClockWidget,
-};
+} as AppDef;

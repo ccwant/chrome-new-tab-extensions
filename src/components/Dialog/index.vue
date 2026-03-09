@@ -88,7 +88,6 @@ onUnmounted(() => {
   box-shadow: 0 32px 90px var(--theme-shadow);
   display: flex;
   flex-direction: column;
-  gap: 10px;
   overflow: hidden;
 
   &.glass {

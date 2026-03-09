@@ -18,6 +18,8 @@
             apps[idx]?.width === 2 ? 'app-cell-span-2' : '',
             apps[idx]?.width === 3 ? 'app-cell-span-3' : '',
             apps[idx]?.width === 4 ? 'app-cell-span-4' : '',
+            apps[idx]?.width === 5 ? 'app-cell-span-5' : '',
+            apps[idx]?.width === 6 ? 'app-cell-span-6' : '',
             apps[idx]?.height === 2 ? 'app-cell-row-span-2' : '',
             isCellCovered(idx) ? 'app-cell-covered' : '',
           ]"
@@ -105,7 +107,14 @@ const dragState = reactive<{
   previewIndex: number | null;
   previewWidth: number;
   previewHeight: number;
-}>({ fromIndex: null, offsetX: 0, offsetY: 0, previewIndex: null, previewWidth: 1, previewHeight: 1 });
+}>({
+  fromIndex: null,
+  offsetX: 0,
+  offsetY: 0,
+  previewIndex: null,
+  previewWidth: 1,
+  previewHeight: 1,
+});
 
 const appCount = computed(() => props.apps.filter(Boolean).length);
 const isEmpty = computed(() => appCount.value === 0);
@@ -358,6 +367,29 @@ onUnmounted(() => {
   }
 }
 
+.app-cell-span-5 {
+  grid-column: span 5;
+
+  & + .app-cell,
+  & + .app-cell + .app-cell,
+  & + .app-cell + .app-cell + .app-cell,
+  & + .app-cell + .app-cell + .app-cell + .app-cell {
+    display: none;
+  }
+}
+
+.app-cell-span-6 {
+  grid-column: span 6;
+
+  & + .app-cell,
+  & + .app-cell + .app-cell,
+  & + .app-cell + .app-cell + .app-cell,
+  & + .app-cell + .app-cell + .app-cell + .app-cell,
+  & + .app-cell + .app-cell + .app-cell + .app-cell + .app-cell {
+    display: none;
+  }
+}
+
 .app-cell-row-span-2 {
   grid-row: span 2;
 }
@@ -374,6 +406,7 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   cursor: pointer;
   text-align: center;
