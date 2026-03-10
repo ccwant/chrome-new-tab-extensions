@@ -8,6 +8,8 @@
         :style="{
           width: gridSize.width + 'px',
           height: gridSize.height + 'px',
+          minWidth: gridSize.width + 'px',
+          minHeight: gridSize.height + 'px',
         }"
       >
         <div
@@ -273,7 +275,8 @@ const previewOverlayStyle = computed(() => {
 
 function updateGridSize() {
   const height = window.outerHeight - 87 - 20;
-  const cellSite = height / GRID_ROWS;
+  // const cellSite = height / GRID_ROWS;
+  const cellSite = 76;
   gridSize.value = {
     width: cellSite * GRID_COLS,
     height: cellSite * GRID_ROWS,
@@ -295,15 +298,11 @@ onUnmounted(() => {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow: hidden auto;
+  overflow: auto;
 }
 
 .grid-wrapper {
   position: relative;
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .apps-grid {
