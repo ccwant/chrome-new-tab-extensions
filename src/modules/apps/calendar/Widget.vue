@@ -138,9 +138,9 @@ function buildMonthCells(
         type = "holiday";
         hasHolidayDot = true;
       } else {
-        // 调休上班日
+        // 调休上班日（加班）
         type = "overtime";
-        // 如果是周末被要求上班，用红色背景强调
+        // 如果是周末被要求上班，用绿色背景强调
         if (weekday === 0 || weekday === 6) {
           isWeekendOvertime = true;
         }
@@ -176,8 +176,6 @@ async function fetchYearData() {
   try {
     const resp = await fetch(`/holidays.json`);
     const data = (await resp.json()) as any;
-
-    console.log("-- data", data);
     const map: Record<string, YearHolidayItem> = {};
     for (const item of data) {
       map[item.date] = item;
@@ -356,7 +354,7 @@ onMounted(() => {
 }
 
 .day-dot-overtime {
-  background: #ef4444;
+  background: #22c55e;
 }
 .day-type-holiday {
   background: rgba(248, 113, 113, 0.16);
@@ -367,15 +365,14 @@ onMounted(() => {
 }
 
 .day-type-overtime {
-  background: rgba(234, 179, 8, 0.18);
+  background: rgba(34, 197, 94, 0.18);
 }
 
 .day-weekend-overtime {
-  background: rgba(248, 113, 113, 0.25);
+  background: rgba(34, 197, 94, 0.28);
 }
 
 .day-today {
   box-shadow: 0 0 0 1px rgba(52, 211, 153, 0.9);
 }
-
 </style>

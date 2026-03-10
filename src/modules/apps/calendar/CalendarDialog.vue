@@ -216,7 +216,7 @@ function onDayClick(cell: DialogCell) {
 }
 
 .legend-overtime {
-  background: rgba(234, 179, 8, 0.9);
+  background: rgba(34, 197, 94, 0.9);
 }
 
 .legend-today {
@@ -301,7 +301,7 @@ function onDayClick(cell: DialogCell) {
 }
 
 .day-dot-overtime {
-  background: #ef4444;
+  background: #22c55e;
 }
 
 .day-type-holiday {
@@ -315,12 +315,12 @@ function onDayClick(cell: DialogCell) {
 }
 
 .day-type-overtime {
-  background: rgba(234, 179, 8, 0.12);
-  color: #eab308;
+  background: rgba(34, 197, 94, 0.12);
+  color: #22c55e;
 }
 
 .day-weekend-overtime {
-  background: rgba(248, 113, 113, 0.22);
+  background: rgba(34, 197, 94, 0.22);
 }
 
 .day-today {
