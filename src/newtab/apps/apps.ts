@@ -4,6 +4,7 @@ import search from "./search";
 import notes from "./notes";
 import weather from "./weather";
 import calendar from "./calendar";
+import alarmClock from "./alarm-clock";
 import type { AppDef } from "@/types";
 
 export const APP_MAP: Record<string, AppDef> = {
@@ -13,6 +14,7 @@ export const APP_MAP: Record<string, AppDef> = {
   notes: notes,
   weather: weather,
   calendar: calendar,
+  alarmClock: alarmClock,
 };
 
 export const APPS = Object.values(APP_MAP);

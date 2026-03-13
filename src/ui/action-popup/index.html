@@ -2,7 +2,7 @@
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <title>新标签页</title>
+    <title>扩展弹窗</title>
     <style>
       * {
         box-sizing: border-box;
@@ -11,8 +11,6 @@
       body {
         margin: 0;
         padding: 0;
-        height: 100%;
-        width: 100%;
         overflow: hidden;
       }
       body {
@@ -22,18 +20,12 @@
           BlinkMacSystemFont,
           "Segoe UI",
           sans-serif;
-        background: radial-gradient(
-          circle at top,
-          var(--theme-bg) 0,
-          var(--theme-bg-mid) 40%,
-          var(--theme-bg-end) 100%
-        );
-        color: var(--theme-text);
+        background: #f5f7fb;
       }
     </style>
   </head>
   <body>
     <div id="app"></div>
-    <script type="module" src="/src/main.ts"></script>
+    <script type="module" src="./index.ts"></script>
   </body>
 </html>

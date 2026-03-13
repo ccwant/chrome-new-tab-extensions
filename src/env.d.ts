@@ -28,16 +28,3 @@ interface ChromeBookmarkNode {
   url?: string;
   children?: ChromeBookmarkNode[];
 }
-
-declare const chrome: {
-  runtime: { id: string; getURL(path: string): string };
-  bookmarks?: {
-    getTree(cb: (tree: ChromeBookmarkNode[]) => void): void;
-    getSubTree(id: string, cb: (nodes: ChromeBookmarkNode[]) => void): void;
-    create(opts: { parentId: string; title: string }, cb?: () => void): void;
-    update(id: string, opts: { title?: string; url?: string }, cb?: () => void): void;
-    remove(id: string, cb?: () => void): void;
-    removeTree(id: string, cb?: () => void): void;
-    move(id: string, opts: { parentId: string; index: number }, cb?: () => void): void;
-  };
-};

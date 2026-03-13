@@ -54,19 +54,19 @@ const engines: { id: EngineId; label: string; icon: string; buildUrl: (q: string
   {
     id: "baidu",
     label: "Baidu",
-    icon: "images/search/baidu.png",
+    icon: "/images/search/baidu.png",
     buildUrl: (q) => `https://www.baidu.com/s?wd=${encodeURIComponent(q)}`,
   },
   {
     id: "bing",
     label: "Bing",
-    icon: "images/search/bing_p_rr_teal_min.png",
+    icon: "/images/search/bing_p_rr_teal_min.png",
     buildUrl: (q) => `https://www.bing.com/search?q=${encodeURIComponent(q)}`,
   },
   {
     id: "google",
     label: "Google",
-    icon: "images/search/googleg_alldp.png",
+    icon: "/images/search/googleg_alldp.png",
     buildUrl: (q) => `https://www.google.com/search?q=${encodeURIComponent(q)}`,
   },
 ];
@@ -109,7 +109,7 @@ function doSearch() {
   border-radius: 20px;
   background: var(--theme-surface);
   border: 1px solid var(--theme-border);
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
   display: flex;
   align-items: center;
   overflow: hidden;

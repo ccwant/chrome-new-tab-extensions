@@ -48,7 +48,7 @@ import { ref, watch } from "vue";
 import Dialog from "@/components/Dialog/index.vue";
 import AppCenterDetail from "./AppCenterDetail.vue";
 import { getAppIcon } from "./utils";
-import { APPS } from "@/modules/apps/apps";
+import { APPS } from "@/newtab/apps/apps";
 import type { AppDef } from "@/types";
 
 import type { AddAppPayload } from "@/types";

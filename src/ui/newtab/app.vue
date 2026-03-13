@@ -58,16 +58,16 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, onUnmounted } from "vue";
-import { APPS } from "./modules/apps/apps";
-import { DEFAULT_APPS, STORAGE_KEY, MAX_APPS, GRID_COLS, GRID_ROWS } from "./config";
-import AddModal from "./modules/add/AddModal.vue";
-import AppCenter from "./modules/app-center/AppCenter.vue";
-import AppGrid from "./modules/grid/AppGrid.vue";
-import ContextMenu from "./modules/context-menu/ContextMenu.vue";
-import Toast from "./components/Toast.vue";
-import SettingsDrawer from "./modules/settings/SettingsDrawer.vue";
-import type { AppItem, AddAppPayload } from "./types";
-import Wallpaper from "./modules/wallpaper/index.vue";
+import { APPS } from "@/newtab/apps/apps";
+import { DEFAULT_APPS, STORAGE_KEY, MAX_APPS, GRID_COLS, GRID_ROWS } from "@/config";
+import AddModal from "@/newtab/add/AddModal.vue";
+import AppCenter from "@/newtab/app-center/AppCenter.vue";
+import AppGrid from "@/newtab/grid/AppGrid.vue";
+import ContextMenu from "@/newtab/context-menu/ContextMenu.vue";
+import Toast from "@/components/Toast.vue";
+import SettingsDrawer from "@/newtab/settings/SettingsDrawer.vue";
+import type { AppItem, AddAppPayload } from "@/types";
+import Wallpaper from "@/newtab/wallpaper/index.vue";
 
 const apps = ref<(AppItem | null)[]>(new Array(MAX_APPS).fill(null));
 const addModalVisible = ref(false);
@@ -190,10 +190,23 @@ function canPlaceAt(i: number, w: number, h: number): boolean {
 function* candidatesAround(center: number): Generator<number> {
   const centerRow = Math.floor(center / GRID_COLS);
   const centerCol = center % GRID_COLS;
-  const maxRadius = Math.max(centerRow, GRID_ROWS - 1 - centerRow, centerCol, GRID_COLS - 1 - centerCol);
+  const maxRadius = Math.max(
+    centerRow,
+    GRID_ROWS - 1 - centerRow,
+    centerCol,
+    GRID_COLS - 1 - centerCol
+  );
   for (let r = 0; r <= maxRadius; r++) {
-    for (let row = Math.max(0, centerRow - r); row <= Math.min(GRID_ROWS - 1, centerRow + r); row++) {
-      for (let col = Math.max(0, centerCol - r); col <= Math.min(GRID_COLS - 1, centerCol + r); col++) {
+    for (
+      let row = Math.max(0, centerRow - r);
+      row <= Math.min(GRID_ROWS - 1, centerRow + r);
+      row++
+    ) {
+      for (
+        let col = Math.max(0, centerCol - r);
+        col <= Math.min(GRID_COLS - 1, centerCol + r);
+        col++
+      ) {
         if (Math.max(Math.abs(row - centerRow), Math.abs(col - centerCol)) === r) {
           yield row * GRID_COLS + col;
         }
@@ -203,9 +216,11 @@ function* candidatesAround(center: number): Generator<number> {
 }
 
 function addApp(payload: AddAppPayload): boolean {
-  const { name, url, iconDataUrl, iconUrl, type, widgetId, width, height, preferredIndex } = payload;
+  const { name, url, iconDataUrl, iconUrl, type, widgetId, width, height, preferredIndex } =
+    payload;
   const appDef = type === "widget" || type === "app" ? APPS.find((a) => a.id === widgetId) : null;
-  const w = (type === "widget" || type === "app") && appDef ? (appDef.width ?? width ?? 1) : (width ?? 1);
+  const w =
+    (type === "widget" || type === "app") && appDef ? (appDef.width ?? width ?? 1) : (width ?? 1);
   const h = height ?? appDef?.height ?? 1;
 
   if (apps.value.filter(Boolean).length >= MAX_APPS) {

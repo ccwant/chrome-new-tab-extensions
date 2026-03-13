@@ -14,4 +14,19 @@ export default defineConfig({
       "@": resolve(__dirname, "src"),
     },
   },
+  build: {
+    rollupOptions: {
+      input: {
+        newtab: resolve(__dirname, "src/ui/newtab/index.html"),
+        popup: resolve(__dirname, "src/ui/action-popup/index.html"),
+      },
+    },
+  },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        silenceDeprecations: ["legacy-js-api", "color-functions"], // 抑制 legacy JS API 的弃用警告
+      },
+    },
+  },
 });
