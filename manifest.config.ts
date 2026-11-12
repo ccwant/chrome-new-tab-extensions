@@ -2,9 +2,9 @@ import { defineManifest } from "@crxjs/vite-plugin";
 
 export default defineManifest({
   manifest_version: 3,
-  name: "Hello World New Tab",
+  name: "New Tab",
   version: "1.0.0",
-  description: "用 hello world 替换新标签页内容。",
+  description: "替换新标签页内容。",
   permissions: ["bookmarks", "favicon", "alarms", "notifications", "storage"],
   chrome_url_overrides: {
     newtab: "src/ui/newtab/index.html",
