@@ -17,6 +17,7 @@
           v-if="activeMenu === 'theme'"
           @open-wallpaper-picker="wallpaperDialogVisible = true"
         />
+        <BackupSettings v-else-if="activeMenu === 'backup'" />
         <ChangelogSettings v-else-if="activeMenu === 'changelog'" />
         <AboutSettings v-else-if="activeMenu === 'about'" />
       </main>
@@ -38,12 +39,14 @@ import { useThemeSettings } from "@/composables/useThemeSettings";
 import ThemeSettings from "./menus/ThemeSettings.vue";
 import ChangelogSettings from "./menus/ChangelogSettings.vue";
 import AboutSettings from "./menus/AboutSettings.vue";
+import BackupSettings from "./menus/BackupSettings.vue";
 import WallpaperPickerDialog from "./WallpaperPickerDialog.vue";
 
 const modelValue = defineModel<boolean>({ default: false });
 
 const menuItems = [
   { id: "theme", label: "主题设置" },
+  { id: "backup", label: "备份与还原" },
   { id: "changelog", label: "更新日志" },
   { id: "about", label: "关于" },
 ];
