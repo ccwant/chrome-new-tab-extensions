@@ -51,13 +51,13 @@ import dayjs from "dayjs";
 import AlarmDialog from "./AlarmDialog.vue";
 import ListDialog from "./ListDialog.vue";
 import type { AlarmItem } from "./types";
+import { computeMinutesUntilAlarmTime, computeNextAlarmTimestamp } from "./schedule";
 
 defineOptions({
   inheritAttrs: false,
 });
 
 const alarmClockList = reactive<AlarmItem[]>([]);
-const pendingTimeouts = new Map<string, number>();
 
 const dialogVisible = ref(false);
 const centerVisible = ref(false);
@@ -129,8 +129,13 @@ function handleAlarmFired(alarm: chrome.alarms.Alarm) {
   if (!target) return;
 
   if (target.repeat) {
-    // 重复定时任务：本地立刻重置起点时间，让倒计时从头开始
-    target.createdAt = Date.now();
+    if (target.type === 2) {
+      // 重复定时任务：本地立刻重置起点时间，让倒计时从头开始
+      target.createdAt = Date.now();
+    } else if (target.type === 1) {
+      // 重复闹钟：同步距离下次触发的分钟数，与后台一致
+      target.minutes = computeMinutesUntilAlarmTime(target.time);
+    }
   } else {
     // 一次性任务：本地立刻标记为关闭，和后台逻辑保持一致
     target.enable = false;
@@ -163,15 +168,11 @@ function handleCenterToggle(payload: { id: string; enable: boolean }) {
 
   target.enable = payload.enable;
   chrome.alarms.clear(target.id);
-  clearPendingAlarm(target.id);
 
   //  闹钟类型需要计算分钟数
   if (target.enable && target.type === 1) {
     const time = target.time || dayjs().format("HH:mm");
-    const fullTime = dayjs().format(`YYYY-MM-DD ${time}:00`);
-    const diffMinute = dayjs(fullTime).startOf("minute").diff(dayjs().startOf("minute"), "minute");
-    const minutes = diffMinute > 0 ? diffMinute : 24 * 60 + diffMinute;
-    target.minutes = minutes;
+    target.minutes = computeMinutesUntilAlarmTime(time);
   }
 
   const hasEnabled = alarmClockList.some((x) => x.enable);
@@ -212,7 +213,6 @@ function handleDialogDelete(id: string) {
     const removed = alarmClockList.splice(index, 1)[0];
     chrome.storage.sync.set({ alarmClock: Array.from(alarmClockList) });
     chrome.alarms.clear(removed.id);
-    clearPendingAlarm(removed.id);
     const hasEnabled = alarmClockList.some((x) => x.enable);
     if (!hasEnabled) {
       chrome.action.setBadgeText({ text: "" });
@@ -224,9 +224,7 @@ function handleDialogDelete(id: string) {
 function createAlarm(time: string, repeat: boolean) {
   const id = dayjs().format("YYYYMMDD_HH_mm_ss_SSS");
   const t = time || dayjs().format("HH:mm");
-  const fullTime = dayjs().format(`YYYY-MM-DD ${t}:00`);
-  const diffMinute = dayjs(fullTime).startOf("minute").diff(dayjs().startOf("minute"), "minute");
-  const minutes = diffMinute > 0 ? diffMinute : 24 * 60 + diffMinute;
+  const minutes = computeMinutesUntilAlarmTime(t);
 
   const alarm: AlarmItem = {
     id,
@@ -270,13 +268,10 @@ function updateItem(
   if (!target) return;
 
   chrome.alarms.clear(target.id);
-  clearPendingAlarm(target.id);
 
   if (payload.type === 1) {
     const time = payload.time || dayjs().format("HH:mm");
-    const fullTime = dayjs().format(`YYYY-MM-DD ${time}:00`);
-    const diffMinute = dayjs(fullTime).startOf("minute").diff(dayjs().startOf("minute"), "minute");
-    const minutes = diffMinute > 0 ? diffMinute : 24 * 60 + diffMinute;
+    const minutes = computeMinutesUntilAlarmTime(time);
     target.type = 1;
     target.time = time;
     target.minutes = minutes;
@@ -305,40 +300,20 @@ function setAlarm(alarm: AlarmItem) {
     alarmClock: Array.from(alarmClockList),
   });
 
-  const pending = pendingTimeouts.get(alarm.id);
-  if (pending) {
-    clearTimeout(pending);
-    pendingTimeouts.delete(alarm.id);
-  }
-
   if (alarm.type === 1) {
-    // 只有闹钟类型使用 setTimeout 等到下一分钟的第 0 秒再真正创建 chrome.alarms，
-    // 尽量减小闹钟触发的秒级偏差。
-    const nowMs = Date.now();
-    const msToZero = 60_000 - (nowMs % 60_000);
-    console.log("msToZero", msToZero);
-    const timeoutId = window.setTimeout(() => {
-      pendingTimeouts.delete(alarm.id);
-      // 减去1分钟，因为setTimeout会延迟1分钟
-      alarm.minutes -= 1;
-      createChromeAlarm(alarm);
-    }, msToZero);
-    pendingTimeouts.set(alarm.id, timeoutId);
-    return;
+    // 只有闹钟类型需要对齐到目标钟点整分再创建 chrome.alarms，
+    // 尽量减小闹钟触发的秒级偏差（使用 when + computeNextAlarmTimestamp）。
+    alarm.minutes = computeMinutesUntilAlarmTime(alarm.time);
   }
   createChromeAlarm(alarm);
 }
 function createChromeAlarm(alarm: AlarmItem) {
-  console.log("createChromeAlarm", alarm);
-  chrome.alarms.create(alarm.id, { delayInMinutes: alarm.minutes });
-}
-
-function clearPendingAlarm(id: string) {
-  const pending = pendingTimeouts.get(id);
-  if (pending) {
-    clearTimeout(pending);
-    pendingTimeouts.delete(id);
+  if (alarm.type === 1) {
+    chrome.alarms.create(alarm.id, { when: computeNextAlarmTimestamp(alarm.time) });
+    return;
   }
+  // 定时任务：按延迟分钟数创建
+  chrome.alarms.create(alarm.id, { delayInMinutes: alarm.minutes });
 }
 
 function formatCountdown(item: AlarmItem) {

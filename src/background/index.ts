@@ -1,4 +1,8 @@
 import type { AlarmItem } from "@/newtab/apps/alarm-clock/types";
+import {
+  computeMinutesUntilAlarmTime,
+  computeNextAlarmTimestamp,
+} from "@/newtab/apps/alarm-clock/schedule";
 
 chrome.alarms.onAlarm.addListener(async (alarm) => {
   const id = alarm.name;
@@ -23,7 +27,7 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (item.repeat) {
     // 闹钟类型：
     if (item.type === 1) {
-      item.minutes = 24 * 60;
+      item.minutes = computeMinutesUntilAlarmTime(item.time);
     }
     // 定时任务：
     if (item.type === 2) {
@@ -32,7 +36,11 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
     }
     chrome.action.setBadgeText({ text: "ON" });
     chrome.alarms.clear(item.id);
-    chrome.alarms.create(item.id, { delayInMinutes: item.minutes });
+    if (item.type === 1) {
+      chrome.alarms.create(item.id, { when: computeNextAlarmTimestamp(item.time) });
+    } else {
+      chrome.alarms.create(item.id, { delayInMinutes: item.minutes });
+    }
   } else {
     // 一次性任务：触发后关闭
     item.enable = false;
